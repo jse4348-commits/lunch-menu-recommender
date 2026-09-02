@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>점심 메뉴 추천기</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-family: Arial, sans-serif;
+
+            background: linear-gradient(135deg, #ffe4cc, #ffc2ae);
+        }
+
+        /* 전체 카드 */
+        .container {
+            width: 400px;
+            padding: 50px 40px;
+            background-color: white;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0 ,0.5);
+        }
+
+        /* 작은 제목 */
+        .sub-title {
+            margin-bottom: 10px;
+            color: #999;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        /* 메인 제목 */
+        h1 {
+            margin: 0 0 35px;
+            color: #222;
+            font-size: 28px;
+        }
+
+        /* 메뉴 카드 */
+        .menu-card {
+            padding: 35px 20px;
+            margin-bottom: 25px;
+            border: 1px solid #eee;
+            border-radius: 20px;
+            background-color: #fff;
+            box-shadow: 0 3px 10px rgba(0, 0, 0 ,0.5);
+        }
+
+        /* 메뉴 이모지 */
+        #menuEmoji {
+            margin-bottom: 10px;
+            font-size: 70px;
+        }
+
+        /* 메뉴 이름 */
+        #menuName {
+            margin-bottom: 12px;
+            color: #222;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* 카테고리 */
+        #menuCategory {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background-color: #fff1dc;
+            color: #ff7a45;
+            font-size: 13px;
+        }
+
+        /* 추천 버튼 */
+        #btn {
+            width: 100%;
+            padding: 17px;
+            border: none;
+            border-radius: 15px;
+            background-color: #ff633d;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(255, 99, 61, 0.25);
+        }
+
+        #btn:hover {
+            background-color: #ff5430;
+        }
+
+        /* 추천 횟수 */
+        .count {
+            margin-top: 22px;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        #count {
+            color: #ff633d;
+            font-weight: bold;
+        }
+
+        /* 최근 메뉴 */
+        .history {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .history-item {
+            padding: 6px 10px;
+            border-radius: 15px;
+            background-color: #f5f5f5;
+            color: #666;
+            font-size: 12px;
+        }
+
+        /* 메뉴가 바뀔 때 애니메이션 */
+        .shake {
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.03);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div class="sub-title">
+            🍽️ LUNCH PICKER
+        </div>
+        
+        <h1>
+            오늘 점심 뭐 먹지?
+        </h1>
+        
+        <!-- 메뉴 카드 -->
+        <div class="menu-card" id="menuCard">
+            
+            <div id="menuEmoji">
+                🍜
+            </div>
+            
+            <div id="menuName">
+                짜장면
+            </div>
+            
+            <div id="menuCategory">
+                중식
+            </div>
+        </div>
+        
+        <!-- 버튼 -->
+        <button id="btn">
+            🎲 다시 추천받기
+        </button>
+        
+        <!-- 추천 횟수 -->
+        <div class="count">
+            지금까지 <span id="count">0</span>번 추천받았어요
+        </div>
+        
+        <!-- 최근 추천 메뉴-->
+        <div class="history" id="history">
+        </div>
+    </div>
+
+    <script>
+        // 메뉴 목록
+        const menus = [
+            { name: '짜장면', emoji: '🍜', category: '중식' },
+            { name: '김치찌개', emoji: '🍲', category: '한식' },
+            { name: '초밥', emoji: '🍣', category: '일식' },
+            { name: '피자', emoji: '🍕', category: '양식' },
+            { name: '삼겹살', emoji: '🥩', category: '한식' },
+            { name: '파스타', emoji: '🍝', category: '양식' },
+            { name: '치킨', emoji: '🍗', category: '치킨' },
+            { name: '햄버거', emoji: '🍔', category: '패스트푸드' }
+        ];
+
+        // 이전에 선택된 메뉴
+        let previousIndex = -1;
+
+        // 추천 횟수
+        let count = 0;
+
+        // 메뉴 추천 함수
+        function recommendMenu() {
+
+            // 랜덤 인덱스
+            let index = Math.floor(Math.random() * menus.length);
+
+            // 같은 메뉴가 연속으로 나오지 않도록
+            while (index === previousIndex) {
+                index = Math.floor(Math.random() * menus.length);
+            }
+
+            // 선택된 메뉴
+            const picked = menus[index];
+
+            // 이전 메뉴 저장
+            previousIndex = index;
+
+            // 추천 횟수 증가
+            count++;
+
+            // 화면에 메뉴 이름 출력
+            document.getElementById('menuName').textContent = picked.name;
+
+            // 화면에 이모지 출력
+            document.getElementById('menuEmoji').textContent = picked.emoji;
+
+            // 화면에 카테고리 출력
+            document.getElementById('menuCategory').textContent = picked.category;
+
+            // 추천 횟수 출력
+            document.getElementById('count').textContent = count;
+
+            // 최근 추천 메뉴 추가
+            const history = document.getElementById('history');
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.textContent = picked.emoji + ' ' + picked.name;
+            history.appendChild(item);
+
+            // 최근 메뉴는 최대 5개까지만 표시
+            if (history.children.length > 5) {
+                history.removeChild(history.firstChild);
+            }
+
+            // 카드 애니메이션
+            const card = document.getElementById('menuCard');
+            card.classList.remove('shake');
+            void card.offsetWidth;
+            card.classList.add('shake');
+        }
+
+        // 페이지가 처음 열렸을 때 추천
+        recommendMenu();
+
+        // 버튼 클릭 이벤트
+        document.getElementById('btn').addEventListener('click',function() {
+            recommendMenu();
+        });
+    </script>
+</body>
+</html>
